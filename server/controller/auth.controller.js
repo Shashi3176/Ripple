@@ -35,13 +35,15 @@ export const handleSignup = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password,10);
 
     const private_key = await bcrypt.hash(email + password,10); 
+    
+    const username = await generateUsername();
 
-    await sql`
-    INSERT INTO users(email, password, private_key)
-    VALUES (${email}, ${hashedPassword}, ${private_key})
+    const user = await sql`
+    INSERT INTO users(email, password, private_key, username)
+    VALUES (${email}, ${hashedPassword}, ${private_key}, ${username})
+    RETURNING *
     `;
 
-    const username = await generateUsername();
 
     const token = generateToken(email);
 
@@ -57,6 +59,7 @@ export const handleSignup = async (req, res) => {
     return res
       .status(201)      
       .json({ 
+        user: user[0],
         message: "User created",
         username, 
         anion_key: private_key
@@ -98,6 +101,12 @@ export const handleLogin = async (req, res) => {
 
   const username = await generateUsername();
 
+  await sql`
+    UPDATE users
+    SET username = ${username}
+    where id = ${user.id};
+  `;
+
   res.cookie("username", username.username);
 
   res.cookie("auth_token", token, {
@@ -110,6 +119,7 @@ export const handleLogin = async (req, res) => {
   return res
   .status(200)
   .json({
+    user,
     message: "Login Successful",
     username
   })
@@ -117,7 +127,19 @@ export const handleLogin = async (req, res) => {
 
 export const handleLogout = async (req, res) => {
   try {    
+    const user = await sql`
+      SELECT id FROM users
+      WHERE email = req.user.email
+    `
+    
+    await sql`
+      UPDATE users
+      SET username = ${"NULL"}
+      WHERE id = ${user[0].id}
+    `;
+
     await removeUsername(req.cookies?.username);
+    
     res.clearCookie("username");
     res.clearCookie("auth_token", {
       httpOnly: true,

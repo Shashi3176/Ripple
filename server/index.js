@@ -2,7 +2,8 @@ import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
-import UserRouter from "./routes/user.routes.js"
+import authRouter from "./routes/auth.routes.js";
+import groupChatRouter from './routes/group_chat.routes.js';
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -23,4 +24,5 @@ app.listen(PORT, () =>
   console.log(`Server started at PORT ${PORT}`)
 );
 
-app.use("/api",UserRouter)
+app.use("/auth",authRouter)
+app.use("/groupchat",groupChatRouter)
