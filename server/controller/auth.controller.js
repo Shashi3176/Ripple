@@ -62,7 +62,8 @@ export const handleSignup = async (req, res) => {
         user: user[0],
         message: "User created",
         username, 
-        anion_key: private_key
+        anion_key: private_key,
+        token
      });
 
   } catch (err) {
@@ -75,21 +76,27 @@ export const handleSignup = async (req, res) => {
 export const handleLogin = async (req, res) => {
   const { email, password} = req.body;
 
-  const [user] = await sql`
+  if(!email || !password){
+    return res
+    .status(401)
+    .json({message: "All fields are must"});
+  }
+
+  const user = await sql`
   SELECT *
   FROM users
   WHERE email = ${email}
   LIMIT 1
   `;
 
-  if(!user){
+  if(user.length == 0){
     return res
     .status(401)
     .json({message: "User not found"});
   }
 
-  const validPassword = await bcrypt.compare(password, user.password);
-  const validUser = await bcrypt.compare(email + password, user.private_key);
+  const validPassword = await bcrypt.compare(password, user[0].password);
+  const validUser = await bcrypt.compare(email + password, user[0].private_key);
 
   if(!validUser || !validPassword){
     return res
@@ -101,10 +108,10 @@ export const handleLogin = async (req, res) => {
 
   const username = await generateUsername();
 
-  await sql`
+  await sql`   
     UPDATE users
-    SET username = ${username}
-    where id = ${user.id};
+    SET username = ${username.username}
+    where id = ${user[0].id};
   `;
 
   res.cookie("username", username.username);
@@ -121,7 +128,8 @@ export const handleLogin = async (req, res) => {
   .json({
     user,
     message: "Login Successful",
-    username
+    username,
+    token
   })
 };
 

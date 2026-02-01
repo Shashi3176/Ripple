@@ -4,11 +4,18 @@ import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 import authRouter from "./routes/auth.routes.js";
 import groupChatRouter from './routes/group_chat.routes.js';
-
-const app = express();
-const PORT = process.env.PORT || 4000;
+import http from "http";
+import { initSocket } from "./socket/index.js";
+import { startRoomExpiryJob } from "./services/socket.services.js";
+import { attachIO } from "./middleware/socket.middleware.js";
 
 dotenv.config();
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+const server = http.createServer(app);
+
+initSocket(server);
 
 app.use(
   cors({
@@ -20,9 +27,13 @@ app.use(
 app.use(express.json()); 
 app.use(cookieParser());
 
-app.listen(PORT, () =>
-  console.log(`Server started at PORT ${PORT}`)
-);
+app.use(attachIO);
 
 app.use("/auth",authRouter)
 app.use("/groupchat",groupChatRouter)
+
+startRoomExpiryJob();
+
+server.listen(3000, () => {
+  console.log(`Server running on port ${PORT}`);
+});

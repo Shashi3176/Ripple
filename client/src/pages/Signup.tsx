@@ -1,7 +1,4 @@
-"use client";
-
 import React, { useState, useEffect } from "react";
-import bcrypt from "bcryptjs";
 import axios from "axios";
 
 import { Label } from "../components/ui/label";
@@ -13,6 +10,7 @@ import {
 } from "@tabler/icons-react";
 
 import { Link } from "react-router-dom";
+import { initSocket } from "../utilities/socket";
 
 export default function SignupForm() {
   useEffect(() => {  
@@ -35,7 +33,7 @@ export default function SignupForm() {
       }
 
       const res = await axios.post(
-        "http://localhost:4000/api/signup",
+        "http://localhost:3000/auth/signup",
         {
           email,
           password,
@@ -45,6 +43,13 @@ export default function SignupForm() {
           withCredentials: true,
         }
       );
+
+      const token = res.data.token;
+        if(!token) throw new Error("No token received");
+
+        localStorage.setItem('token', token);
+
+        initSocket(token);
       setStatus("success");
     } catch (err) {
       console.error("Signup error:", err);

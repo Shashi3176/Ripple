@@ -5,6 +5,11 @@ export const createGroupChatRoom = async (req ,res) => {
     const {id} = req.params;    
     
     const {room_name} = req.body;
+
+    const username = await sql`
+      SELECT username FROM users
+      WHERE id = ${id}
+    `
     
     if(!room_name){
         return res
@@ -21,18 +26,23 @@ export const createGroupChatRoom = async (req ,res) => {
   `;
 
     await sql`
-    INSERT INTO group_chat_members(chat_room_id, user_id)
-    VALUES (${chat_room[0].id}, ${id})
+    INSERT INTO group_chat_members(chat_room_id, user_id, user_name)
+    VALUES (${chat_room[0].id}, ${id}, ${username}) 
     RETURNING *
   `;
+
+  req.io.emit('room:created', chat_room);
+  console.log("Room created");
 
   return res
   .status(201)
   .json({
-    room_id: chat_room[0].id,
+    chat_room,
     message: "Chat room created successfully"
   });
   } catch (error) {
+
+    console.log(error);
     return res
     .status(500)
     .json({message: "Something went wrong"})
@@ -42,6 +52,13 @@ export const createGroupChatRoom = async (req ,res) => {
 export const joinGroupChatRoom = async (req, res) => {
   try {
     const { id, roomId } = req.params;
+
+    const username = await sql`
+      SELECT username FROM users
+      WHERE id = ${id}
+    `
+
+    const member = {id, username};
 
     const room = await sql`
       SELECT id, ends_at
@@ -75,17 +92,19 @@ export const joinGroupChatRoom = async (req, res) => {
     }
 
     await sql`
-      INSERT INTO group_chat_members(chat_room_id, user_id)
-      VALUES (${roomId}, ${id})
+      INSERT INTO group_chat_members(chat_room_id, user_id, user_name)
+      VALUES (${roomId}, ${id}, ${username})
     `;
 
-    return res
-      .status(200)
-      .json({ message: "Joined chat room successfully" });
+     req.io.emit('room:member:joined', {roomId, member});
+     
+     return res
+     .status(200)
+     .json({ message: "Joined chat room successfully" });
 
   } catch (error) {
     return res
-      .status(500)
+    .status(500)
       .json({ message: "Something went wrong" });
   }
 };
@@ -93,6 +112,11 @@ export const joinGroupChatRoom = async (req, res) => {
 export const leaveGroupChatRoom = async (req, res) => {
   try {
     const { id, roomId } = req.params;
+
+    const member = await sql`
+      SELECT id, username FROM users
+      WHERE id = ${id}
+    `
 
     const membership = await sql`
       SELECT g.owner_id
@@ -102,7 +126,7 @@ export const leaveGroupChatRoom = async (req, res) => {
       WHERE m.chat_room_id = ${roomId}
       AND m.user_id = ${id}
     `;
-
+      
     if (membership.length === 0) {
       return res
         .status(404)
@@ -120,6 +144,7 @@ export const leaveGroupChatRoom = async (req, res) => {
       WHERE chat_room_id = ${roomId}
       AND user_id = ${id}
     `;
+    req.io.emit('room:member:left', {roomId, member});
 
     return res
       .status(200)
@@ -130,4 +155,19 @@ export const leaveGroupChatRoom = async (req, res) => {
       .status(500)
       .json({ message: "Something went wrong" });
   }
+};
+
+export const getActiveRooms = async (req, res) => {
+  const now = Date.now();
+
+  const rooms = await sql`
+    SELECT *
+    FROM group_chat_room
+    WHERE ends_at > ${now}
+    ORDER BY ends_at ASC
+  `;
+
+  console.log(rooms);
+
+  res.json({ rooms });
 };
