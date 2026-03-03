@@ -1,10 +1,14 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 import { useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
+
 
 export default function Home() {
+  const navigate = useNavigate();
   useEffect(() => {  
     document.title = 'Ripple';
+    {navigate('/login')};
   }, [])
   
   return (
@@ -16,7 +20,8 @@ export default function Home() {
             >               
             <Link to={"/signup"}>
               SignUp     
-            </Link>                                                 
+            </Link>                    
+
           </p>
         </button>
       </div>

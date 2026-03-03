@@ -35,13 +35,15 @@ export const handleSignup = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password,10);
 
     const private_key = await bcrypt.hash(email + password,10); 
+    
+    const username = await generateUsername();
 
-    await sql`
-    INSERT INTO users(email, password, private_key)
-    VALUES (${email}, ${hashedPassword}, ${private_key})
+    const user = await sql`
+    INSERT INTO users(email, password, private_key, username)
+    VALUES (${email}, ${hashedPassword}, ${private_key}, ${username})
+    RETURNING *
     `;
 
-    const username = await generateUsername();
 
     const token = generateToken(email);
 
@@ -57,9 +59,11 @@ export const handleSignup = async (req, res) => {
     return res
       .status(201)      
       .json({ 
+        user: user[0],
         message: "User created",
         username, 
-        anion_key: private_key
+        anion_key: private_key,
+        token
      });
 
   } catch (err) {
@@ -72,21 +76,27 @@ export const handleSignup = async (req, res) => {
 export const handleLogin = async (req, res) => {
   const { email, password} = req.body;
 
-  const [user] = await sql`
+  if(!email || !password){
+    return res
+    .status(401)
+    .json({message: "All fields are must"});
+  }
+
+  const user = await sql`
   SELECT *
   FROM users
   WHERE email = ${email}
   LIMIT 1
   `;
 
-  if(!user){
+  if(user.length == 0){
     return res
     .status(401)
     .json({message: "User not found"});
   }
 
-  const validPassword = await bcrypt.compare(password, user.password);
-  const validUser = await bcrypt.compare(email + password, user.private_key);
+  const validPassword = await bcrypt.compare(password, user[0].password);
+  const validUser = await bcrypt.compare(email + password, user[0].private_key);
 
   if(!validUser || !validPassword){
     return res
@@ -97,6 +107,12 @@ export const handleLogin = async (req, res) => {
   const token = generateToken(email);
 
   const username = await generateUsername();
+
+  await sql`   
+    UPDATE users
+    SET username = ${username.username}
+    where id = ${user[0].id};
+  `;
 
   res.cookie("username", username.username);
 
@@ -110,14 +126,28 @@ export const handleLogin = async (req, res) => {
   return res
   .status(200)
   .json({
+    user,
     message: "Login Successful",
-    username
+    username,
+    token
   })
 };
 
 export const handleLogout = async (req, res) => {
   try {    
+    const user = await sql`
+      SELECT id FROM users
+      WHERE email = req.user.email
+    `
+    
+    await sql`
+      UPDATE users
+      SET username = ${"NULL"}
+      WHERE id = ${user[0].id}
+    `;
+
     await removeUsername(req.cookies?.username);
+    
     res.clearCookie("username");
     res.clearCookie("auth_token", {
       httpOnly: true,
