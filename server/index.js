@@ -3,7 +3,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 import authRouter from "./routes/auth.routes.js";
-import groupChatRouter from './routes/group_chat.routes.js';
+import chatRouter from './routes/chat.routes.js';
 import http from "http";
 import { initSocket } from "./socket/index.js";
 import { startRoomExpiryJob } from "./services/socket.services.js";
@@ -30,7 +30,8 @@ app.use(cookieParser());
 app.use(attachIO);
 
 app.use("/auth",authRouter)
-app.use("/groupchat",groupChatRouter)
+app.use("/groupchat",chatRouter)
+app.use("/directChat",chatRouter)
 
 startRoomExpiryJob();
 
