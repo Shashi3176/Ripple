@@ -5,8 +5,11 @@ import { getGroupChatMessages, sendGroupMessage } from "../controller/group_chat
 import { verifyRoomMember } from "../middleware/groupchat.middleware.js";
 import { leaveDirectChat, pairDirectChat } from "../controller/direct_chat.controller.js";
 import { sendDirectMessage } from "../controller/direct_chat_messages.js";
+import { campusOnly } from "../middleware/campusOnly.middleware.js";
 
 const router = Router();
+
+router.use(campusOnly);
 
 router.post('/creategroupchatroom/:id', verifyJWT,createGroupChatRoom)
 router.post('/joingroupchatroom/:id/:roomId', verifyJWT,joinGroupChatRoom)
