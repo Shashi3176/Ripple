@@ -37,16 +37,44 @@ export const pairDirectChat = async (req, res) => {
             DELETE FROM direct_chat
             WHERE id = ${existingChatId}
         `;
+        
+        // Clear current user's dir_room_id to avoid inconsistent state
+        await sql`
+            UPDATE users
+            SET dir_room_id = ${null}
+            WHERE id = ${id}
+        `;
     }
 
-    const [user2] = await sql`
-        SELECT * FROM users
-        WHERE id != ${id} AND dir_room_id IS NULL
-        ORDER BY RANDOM()
-        LIMIT 1;
-    `   
-
-    if(!user2){
+    // Find an available user to pair with, checking for race conditions
+    let user2 = null;
+    let attempts = 0;
+    const maxAttempts = 3;
+    
+    while (!user2 && attempts < maxAttempts) {
+        const [potentialUser2] = await sql`
+            SELECT * FROM users
+            WHERE id != ${id} AND dir_room_id IS NULL
+            ORDER BY RANDOM()
+            LIMIT 1;
+        `;
+        
+        // Verify the user is still available (not paired by another request)
+        if (potentialUser2) {
+            const [verifyUser] = await sql`
+                SELECT dir_room_id FROM users
+                WHERE id = ${potentialUser2.id}
+            `;
+            
+            if (verifyUser && verifyUser.dir_room_id === null) {
+                user2 = potentialUser2;
+            }
+        }
+        
+        attempts++;
+    }
+    
+    if (!user2){
         return res
         .status(200)
         .json({message: "No users available right now"})

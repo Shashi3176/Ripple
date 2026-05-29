@@ -4,10 +4,23 @@ export const sendGroupMessage = async (req, res) => {
     const {id, roomId} = req.params;
     const {message} = req.body;
 
-    const username = await sql`
-        SELECT username FROM users
-        WHERE id = ${id}
+    // Validate user exists
+    const user = await sql`
+      SELECT id FROM users
+      WHERE id = ${id}
+    `;
+    
+    if (user.length === 0) {
+        return res
+            .status(404)
+            .json({message: "User not found"});
+    }
+
+    const usernameResult = await sql`
+         SELECT username FROM users
+         WHERE id = ${id}
     `
+    const username = usernameResult[0].username
 
     if(!message){
         return res
@@ -46,16 +59,27 @@ export const sendGroupMessage = async (req, res) => {
 
 export const getGroupChatMessages = async (req, res) => {
     const {roomId} = req.params;
+    
+    // Pagination parameters
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 50; // Default to 50 messages
+    const offset = (page - 1) * limit;
 
     const messages = await sql`
         SELECT * FROM group_chat_messages
         WHERE room_id = ${roomId}
+        ORDER BY created_at ASC
+        LIMIT ${limit} OFFSET ${offset}
     `
 
     return res
-    .status(200)
-    .json({
-        messages,
-        message: "Messages loaded successfully"
-    });
+        .status(200)
+        .json({
+            messages,
+            message: "Messages loaded successfully",
+            pagination: {
+                page,
+                limit
+            }
+        });
 }

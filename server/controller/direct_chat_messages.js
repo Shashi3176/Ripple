@@ -4,10 +4,10 @@ export const sendDirectMessage = async (req, res) => {
     const {id, roomId} = req.params;
     const {message} = req.body;
 
-    const username = await sql`
-        SELECT username FROM users
-        WHERE id = ${id}
-    `
+    const [username] = await sql`
+         SELECT username FROM users
+         WHERE id = ${id}
+     `
 
     if(!message){
         return res

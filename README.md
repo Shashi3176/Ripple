@@ -9,12 +9,38 @@ It might become difficult for understanding how the routes are working in fronte
 
 
 ### Backend
-Example for the login page and signup page the api design will look somthing like this
+The backend structure is as follows:
+
 ```
-/
-└── api/
-       ├── login/
-       └── signup
-``` 
-### Frontend
-Adding the routes of pages here as they are made
+server/
+├── .env
+├── .gitignore
+├── index.js
+├── package.json
+├── package-lock.json
+├── controller/
+│   ├── auth.controller.js
+│   ├── direct_chat.controller.js
+│   ├── direct_chat_messages.js
+│   ├── group_chat.controller.js
+│   └── group_chat_messages.js
+├── db/
+│   └── postgres.js
+├── middleware/
+│   ├── auth.middleware.js
+│   ├── campusOnly.middleware.js
+│   ├── groupchat.middleware.js
+│   └── socket.middleware.js
+├── routes/
+│   ├── auth.routes.js
+│   └── chat.routes.js
+├── services/
+│   ├── createUsername.service.js
+│   ├── nodemailer.services.js
+│   ├── socket.services.js
+│   └── username.service.js
+├── socket/
+│   └── index.js
+└── utilities/
+    └── jwt.js
+```

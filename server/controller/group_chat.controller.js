@@ -6,11 +6,24 @@ export const createGroupChatRoom = async (req ,res) => {
     
     const {room_name} = req.body;
 
-    const username = await sql`
+    // Validate user exists
+    const user = await sql`
+      SELECT id FROM users
+      WHERE id = ${id}
+    `;
+    
+    if (user.length === 0) {
+      return res
+        .status(404)
+        .json({message: "User not found"});
+    }
+
+    const usernameResult = await sql`
       SELECT username FROM users
       WHERE id = ${id}
     `
-    
+    const username = usernameResult[0].username
+
     if(!room_name){
         return res
         .status(400)
@@ -53,10 +66,23 @@ export const joinGroupChatRoom = async (req, res) => {
   try {
     const { id, roomId } = req.params;
 
-    const username = await sql`
+    // Validate user exists
+    const user = await sql`
+      SELECT id FROM users
+      WHERE id = ${id}
+    `;
+    
+    if (user.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "User not found" });
+    }
+
+    const usernameResult = await sql`
       SELECT username FROM users
       WHERE id = ${id}
     `
+    const username = usernameResult[0].username
 
     const member = {id, username};
 
@@ -113,10 +139,23 @@ export const leaveGroupChatRoom = async (req, res) => {
   try {
     const { id, roomId } = req.params;
 
-    const member = await sql`
+    // Validate user exists
+    const user = await sql`
+      SELECT id FROM users
+      WHERE id = ${id}
+    `;
+    
+    if (user.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "User not found" });
+    }
+
+    const memberResult = await sql`
       SELECT id, username FROM users
       WHERE id = ${id}
     `
+    const member = memberResult[0]
 
     const membership = await sql`
       SELECT g.owner_id
@@ -158,16 +197,28 @@ export const leaveGroupChatRoom = async (req, res) => {
 };
 
 export const getActiveRooms = async (req, res) => {
-  const now = Date.now();
+    const now = Date.now();
+    
+    // Pagination parameters
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+    const offset = (page - 1) * limit;
 
-  const rooms = await sql`
-    SELECT *
-    FROM group_chat_room
-    WHERE ends_at > ${now}
-    ORDER BY ends_at ASC
-  `;
+    const rooms = await sql`
+        SELECT *
+        FROM group_chat_room
+        WHERE ends_at > ${now}
+        ORDER BY ends_at ASC
+        LIMIT ${limit} OFFSET ${offset}
+    `;
 
-  console.log(rooms);
+    console.log(rooms);
 
-  res.json({ rooms });
+    res.json({ 
+        rooms,
+        pagination: {
+            page,
+            limit
+        }
+    });
 };
