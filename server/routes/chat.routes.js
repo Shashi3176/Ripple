@@ -9,7 +9,7 @@ import { campusOnly } from "../middleware/campusOnly.middleware.js";
 
 const router = Router();
 
-router.use(campusOnly);
+// router.use(campusOnly);
 
 router.post('/creategroupchatroom/:id', verifyJWT,createGroupChatRoom)
 router.post('/joingroupchatroom/:id/:roomId', verifyJWT,joinGroupChatRoom)
