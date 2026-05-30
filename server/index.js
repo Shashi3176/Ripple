@@ -1,3 +1,4 @@
+console.log('Starting server');
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
@@ -35,6 +36,6 @@ app.use("/directChat",chatRouter)
 
 startRoomExpiryJob();
 
-server.listen(3000, () => {
+server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
