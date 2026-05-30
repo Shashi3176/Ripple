@@ -1,22 +1,18 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-
+import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Label } from "../components/ui/label";
 import { Input } from "../components/ui/input";
 import { cn } from "../utilities/utils";
-import {
-  IconBrandGithub,
-  IconBrandGoogle,  
-} from "@tabler/icons-react";
-
-import { Link } from "react-router-dom";
-import { initSocket } from "../utilities/socket";
 
 export default function SignupForm() {
   useEffect(() => {  
     document.title = 'Signup';
   }, [])
   
+  const navigate = useNavigate();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -44,13 +40,10 @@ export default function SignupForm() {
         }
       );
 
-      const token = res.data.token;
-        if(!token) throw new Error("No token received");
-
-        localStorage.setItem('token', token);
-
-        initSocket(token);
+      // If we get a successful response (2xx), we assume the backend has sent an OTP
+      // and set a cookie for identification. We don't expect a token in the response body.
       setStatus("success");
+      navigate("/otp", { state: { email } });
     } catch (err) {
       console.error("Signup error:", err);
       setStatus("error");
@@ -109,48 +102,25 @@ export default function SignupForm() {
           {status === "loading" ? "Signing Up..." : "Sign Up →"}
           <BottomGradient />
         </button>
-              
+               
         <div className="my-8 h-[1px] w-full bg-gradient-to-r from-transparent via-neutral-300 to-transparent dark:via-neutral-700" />
-            
-            <div className="flex justify-between">
-                <p className = "mb-3 text-sm font-medium leading-none text-black dark:text-white peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                  Already have an account? 
-                </p>
-                <button>
-                  <p 
-                    className = "mb-3 text-sm font-medium leading-none text-black dark:text-white peer-disabled:cursor-not-allowed peer-disabled:opacity-70"                                                                                                                                                                 
-                  >               
-                    <Link to={"/login"}>
-                      Login     
-                    </Link>
-                                                 
-                  </p>
-                </button>
-              </div>
-            
-            <div className="flex flex-col space-y-4">
-              <button
-                className="group/btn shadow-input relative flex h-10 w-full items-center justify-start space-x-2 rounded-md bg-gray-50 px-4 font-medium text-black dark:bg-zinc-900 dark:shadow-[0px_0px_1px_1px_#262626]"
-                type="submit"
-              >
-                <IconBrandGithub className="w-4 h-4 text-neutral-800 dark:text-neutral-300" />
-                <span className="text-sm text-neutral-700 dark:text-neutral-300">
-                  GitHub
-                </span>
-                <BottomGradient />
-              </button>
-              <button
-                className="group/btn shadow-input relative flex h-10 w-full items-center justify-start space-x-2 rounded-md bg-gray-50 px-4 font-medium text-black dark:bg-zinc-900 dark:shadow-[0px_0px_1px_1px_#262626]"
-                type="submit"
-              >
-                <IconBrandGoogle className="w-4 h-4 text-neutral-800 dark:text-neutral-300" />
-                <span className="text-sm text-neutral-700 dark:text-neutral-300">
-                  Google
-                </span>
-              <BottomGradient />
-              </button>          
-            </div>
-
+             
+        <div className="flex justify-between">
+            <p className = "mb-3 text-sm font-medium leading-none text-black dark:text-white peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+              Already have an account? 
+            </p>
+            <button>
+              <p 
+                className = "mb-3 text-sm font-medium leading-none text-black dark:text-white peer-disabled:cursor-not-allowed peer-disabled:opacity-70"                                                                                                                                                                 
+              >               
+                <Link to={"/login"}>
+                  Login     
+                </Link>
+                                                  
+              </p>
+            </button>
+          </div>
+         
         <div className="mt-4 text-sm">
           {status === "success" && (
             <p className="text-green-600">Account created successfully</p>
@@ -171,7 +141,6 @@ export default function SignupForm() {
     </div>
   );
 }
-
 
 const BottomGradient = () => {
   return (
