@@ -7,7 +7,7 @@ import StatsCounter from "../components/landing/StatsCounter";
 import CallToActionSection from "../components/landing/CallToActionSection";
 import Footer from "../components/landing/Footer";
 
-import "../Pages/landing.css";
+import "../pages/landing.css";
 
 import SkipToContent from "../components/landing/SkipToContent";
 import ScrollToTop from "../components/landing/ScrollToTop";
