@@ -1,0 +1,9 @@
+# https://www.robotstxt.org/robotstxt.html
+User-agent: *
+Allow: /
+Disallow: /chats
+Disallow: /admin
+Disallow: /admin/login
+Disallow: /admin/moderation
+
+Sitemap: https://ripple.com/sitemap.xml
