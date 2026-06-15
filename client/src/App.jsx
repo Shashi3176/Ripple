@@ -1,13 +1,13 @@
 import { Box } from "@chakra-ui/react";
 import { BrowserRouter, Switch, Route, Redirect } from "react-router-dom";
-import LandingPage from "./pages/LandingPage";
-import LoginPage from "./pages/LoginPage";
-import Chatpage from "./pages/Chatpage";
+import LandingPage from "./Pages/LandingPage";
+import LoginPage from "./Pages/LoginPage";
+import Chatpage from "./Pages/Chatpage";
 import AdminLogin from "./components/Admin/AdminLogin";
 import AdminModeration from "./components/Admin/AdminModeration";
-import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
-import TermsOfServicePage from "./pages/TermsOfServicePage";
-import CommunityGuidelinesPage from "./pages/CommunityGuidelinesPage";
+import PrivacyPolicyPage from "./Pages/PrivacyPolicyPage";
+import TermsOfServicePage from "./Pages/TermsOfServicePage";
+import CommunityGuidelinesPage from "./Pages/CommunityGuidelinesPage";
 
 const ProtectedRoute = ({ component: Component, ...rest }) => {
   return (

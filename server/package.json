@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node server.js",
     "server": "nodemon server.js",
-    "build": "npm install --legacy-peer-deps && npm install --legacy-peer-deps --prefix frontend && npm run build --prefix frontend",
+    "build": "npm run build --prefix client",
     "seed:anonymous-names": "node scripts/seedAnonymousNames.js",
     "migrate:anonymous-rooms": "node scripts/setupAnonymousRoomIndices.js",
     "migrate:expired-status": "node scripts/migrateExpiredStatus.js",

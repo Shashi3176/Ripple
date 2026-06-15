@@ -16,7 +16,6 @@
     "@emotion/styled": "^11.11.0",
     "axios": "^1.7.0",
     "chart.js": "^4.5.1",
-    "chat-app": "file:..",
     "emoji-button": "^2.2.2",
     "emoji-picker-react": "^4.19.1",
     "framer-motion": "^11.0.0",

@@ -17,8 +17,23 @@ dotenv.config();
 connectDB();
 const app = express();
 
+const allowedOrigins = [
+  "http://localhost:3000",
+  process.env.FRONTEND_URL,
+  process.env.CORS_ORIGIN,
+].filter(Boolean);
+
+const isAllowedOrigin = (origin) => {
+  if (!origin) return true;
+  if (allowedOrigins.includes(origin)) return true;
+  if (process.env.NODE_ENV === "production") {
+    return /^https:\/\/.+\.onrender\.com$/.test(origin);
+  }
+  return false;
+};
+
 app.use(cors({
-  origin: ["http://localhost:3000"],
+  origin: isAllowedOrigin,
   credentials: true,
 }));
 app.use(express.json()); // to accept json data
@@ -41,15 +56,17 @@ app.use("/api/matchmaking", matchmakingRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/health/toxicity", toxicityRoutes);
 
+app.get("/api/health", (req, res) => {
+  res.status(200).json({ status: "ok", service: "ripple" });
+});
+
 // --------------------------deployment------------------------------
 
-const __dirname1 = path.resolve();
-
 if (process.env.NODE_ENV === "production") {
-  app.use(express.static(path.join(__dirname1, "/frontend/build")));
+  app.use(express.static(path.join(__dirname, "..", "frontend", "build")));
 
   app.get("*", (req, res) =>
-    res.sendFile(path.resolve(__dirname1, "frontend", "build", "index.html"))
+    res.sendFile(path.join(__dirname, "..", "frontend", "build", "index.html"))
   );
 } else {
   app.get("/", (req, res) => {
@@ -63,15 +80,18 @@ if (process.env.NODE_ENV === "production") {
 app.use(notFound);
 app.use(errorHandler);
 
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 5000;
 
-// const server = app.listen(PORT, console.log(`Server running on PORT ${PORT}...`.yellow.bold));
-const server = app.listen(PORT);
+const server = app.listen(PORT, () => {
+  console.log(`Server running on PORT ${PORT}...`.yellow.bold);
+});
+// const server = app.listen(PORT);
 
 const io = require("socket.io")(server, {
   pingTimeout: 60000,
   cors: {
-    origin: "http://localhost:3000",
+    origin: isAllowedOrigin,
+    credentials: true,
   },
 });
 

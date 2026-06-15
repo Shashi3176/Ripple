@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: ripple
+    env: docker
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGO_URI
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: HUGGINGFACE_API_TOKEN
+        sync: false
+      - key: ADMIN_SECRET_KEY
+        generateValue: true
+      - key: FRONTEND_URL
+        sync: false
+      - key: TOXICITY_FAIL_MODE
+        value: open
