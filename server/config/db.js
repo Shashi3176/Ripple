@@ -7,12 +7,10 @@ const AnonymousName = require("../models/anonymousNameModel");
 
 const connectDB = async () => {
   try {
-    const conn = await mongoose.connect(process.env.MONGO_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
+    // REMOVED: useNewUrlParser and useUnifiedTopology options
+    const conn = await mongoose.connect(process.env.MONGO_URI);
 
-//     console.log(`MongoDB Connected: ${conn.connection.host}`.cyan.underline);
+    console.log(`MongoDB Connected: ${conn.connection.host}`.cyan.underline);
 
     const poolCount = await AnonymousName.countDocuments();
     if (poolCount === 0) {
@@ -31,4 +29,3 @@ const connectDB = async () => {
 };
 
 module.exports = connectDB;
-

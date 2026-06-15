@@ -24,11 +24,6 @@ const anonymousRoomSchema = mongoose.Schema(
   { timestamps: true }
 );
 
-// Single field indexes
-anonymousRoomSchema.index({ roomType: 1, status: 1 });
-anonymousRoomSchema.index({ expiresAt: 1, status: 1 });
-anonymousRoomSchema.index({ createdAt: -1 });
-anonymousRoomSchema.index({ createdBy: 1 });
 
 // Compound indexes for common queries
 anonymousRoomSchema.index(

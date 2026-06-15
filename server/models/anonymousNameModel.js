@@ -9,10 +9,6 @@ const anonymousNameSchema = mongoose.Schema(
   { timestamps: true }
 );
 
-// Single field indexes
-anonymousNameSchema.index({ name: 1 }, { unique: true });
-anonymousNameSchema.index({ isAvailable: 1 });
-anonymousNameSchema.index({ assignedTo: 1 });
 
 // Compound index for quick available name lookup
 anonymousNameSchema.index(

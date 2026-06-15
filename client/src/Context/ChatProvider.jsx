@@ -3,6 +3,7 @@ import { useHistory } from "react-router-dom";
 import { io } from "socket.io-client";
 import axios from "axios";
 import { requestNotificationPermission, notifyMessage, notifyMatch, notifyPartnerLeft, notifyRoomExpiryWarning, notifyRoomExpired } from "../utils/notifications.js";
+import { getBackendUrl } from "../config/ChatLogics.jsx";
 
 const ChatContext = createContext();
 
@@ -60,7 +61,7 @@ const ChatProvider = ({ children }) => {
   }, [theme]);
 
   useEffect(() => {
-    const socketInstance = io();
+    const socketInstance = io(getBackendUrl(), { withCredentials: true });
     console.log("Socket connecting...");
     
     socketInstance.on("connect", () => {

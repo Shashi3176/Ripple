@@ -174,10 +174,10 @@ const sendMessage = asyncHandler(async (req, res) => {
   try {
     var message = await Message.create(newMessage);
 
-    message = await message.populate("sender", "_id name").execPopulate();
+    message = await message.populate("sender", "_id name");
 
     if (chatId) {
-      message = await message.populate("chat", "_id").execPopulate();
+      message = await message.populate("chat", "_id");
       await Chat.findByIdAndUpdate(chatId, { latestMessage: message });
     }
     
@@ -185,11 +185,11 @@ const sendMessage = asyncHandler(async (req, res) => {
       message = await message.populate({
         path: "room",
         select: "_id roomName topic createdAt",
-      }).execPopulate();
+      });
       message = await message.populate({
         path: "sender",
         populate: { path: "anonymousName", select: "name" },
-      }).execPopulate();
+      });
     }
 
     res.status(201).json(message);
@@ -199,6 +199,7 @@ const sendMessage = asyncHandler(async (req, res) => {
       throw new Error("Duplicate message detected");
     }
     res.status(500);
+    console.log(error);
     throw new Error("Failed to send message");
   }
 });

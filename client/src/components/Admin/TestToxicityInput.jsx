@@ -34,10 +34,7 @@ function TestToxicityInput() {
     }
   };
 
-  const wouldBeBlocked = (r) => {
-    if (!r || !r.categories) return false;
-    return Object.entries(r.categories).some(([label, score]) => score >= (r.threshold || 0.5));
-  };
+  const wouldBeBlocked = (r) => r?.wouldBlock ?? false;
 
   return (
     <Box p={4} borderWidth={1} borderRadius="lg">
@@ -82,11 +79,11 @@ function TestToxicityInput() {
               {wouldBeBlocked(result) ? "Yes" : "No"}
             </Badge>
           </Text>
-          <Text fontWeight="bold" mt={2} mb={1}>
+<Text fontWeight="bold" mt={2} mb={1}>
             Category Scores:
           </Text>
           <Box fontSize="xs">
-            {result.categories && Object.entries(result.categories).map(([label, score]) => (
+            {result.scores && Object.entries(result.scores).map(([label, score]) => (
               <Box key={label} display="flex" justifyContent="space-between" py={1} borderBottomWidth={1}>
                 <Text>{label}</Text>
                 <Badge colorScheme={score >= (result.threshold || 0.5) ? "red" : "gray"}>
@@ -94,7 +91,7 @@ function TestToxicityInput() {
                 </Badge>
               </Box>
             ))}
-            {(!result.categories || Object.keys(result.categories).length === 0) && (
+            {(!result.scores || Object.keys(result.scores).length === 0) && (
               <Text>No category data available</Text>
             )}
           </Box>

@@ -1,3 +1,10 @@
+export const getBackendUrl = () => {
+  const configuredUrl = import.meta.env.VITE_BACKEND_URL;
+  if (configuredUrl) return configuredUrl.replace(/\/$/, "");
+  if (import.meta.env.DEV) return "http://localhost:5000";
+  return window.location.origin;
+};
+
 export const isSameSenderMargin = (messages, m, i, userId) => {
   if (
     i < messages.length - 1 &&

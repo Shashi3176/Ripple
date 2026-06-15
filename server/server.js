@@ -21,6 +21,7 @@ const allowedOrigins = [
   "http://localhost:3000",
   process.env.FRONTEND_URL,
   process.env.CORS_ORIGIN,
+  process.env.CLIENT_URL,
 ].filter(Boolean);
 
 const isAllowedOrigin = (origin) => {
@@ -33,7 +34,9 @@ const isAllowedOrigin = (origin) => {
 };
 
 app.use(cors({
-  origin: isAllowedOrigin,
+  origin: (origin, callback) => {
+    callback(null, isAllowedOrigin(origin));
+  },
   credentials: true,
 }));
 app.use(express.json()); // to accept json data
@@ -90,8 +93,9 @@ const server = app.listen(PORT, () => {
 const io = require("socket.io")(server, {
   pingTimeout: 60000,
   cors: {
-    origin: isAllowedOrigin,
-    credentials: true,
+    origin: process.env.CLIENT_URL || "http://localhost:3000", 
+    methods: ["GET", "POST"],
+    credentials: true
   },
 });
 
