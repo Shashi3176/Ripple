@@ -65,11 +65,17 @@ app.get("/api/health", (req, res) => {
 
 // --------------------------deployment------------------------------
 
-if (process.env.NODE_ENV === "production") {
-  app.use(express.static(path.join(__dirname, "..", "frontend", "build")));
+const shouldServeFrontend = process.env.SERVE_FRONTEND === "true";
+
+const frontendBuildPath = process.env.FRONTEND_BUILD_PATH
+  ? path.resolve(process.env.FRONTEND_BUILD_PATH)
+  : path.join(__dirname, "..", "client", "dist");
+
+if (process.env.NODE_ENV === "production" && shouldServeFrontend) {
+  app.use(express.static(frontendBuildPath));
 
   app.get("*", (req, res) =>
-    res.sendFile(path.join(__dirname, "..", "frontend", "build", "index.html"))
+    res.sendFile(path.join(frontendBuildPath, "index.html"))
   );
 } else {
   app.get("/", (req, res) => {
