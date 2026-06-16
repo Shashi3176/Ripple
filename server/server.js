@@ -90,9 +90,10 @@ app.use(notFound);
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
+const HOST = process.env.HOST || "0.0.0.0";
 
-const server = app.listen(PORT, () => {
-  console.log(`Server running on PORT ${PORT}...`.yellow.bold);
+const server = app.listen(PORT, HOST, () => {
+  console.log(`Server running on ${HOST}:${PORT}...`.yellow.bold);
 });
 // const server = app.listen(PORT);
 
