@@ -19,6 +19,7 @@ const app = express();
 
 const allowedOrigins = [
   "http://localhost:3000",
+  "https://ripple-2t9f.onrender.com",
   process.env.FRONTEND_URL,
   process.env.CORS_ORIGIN,
   process.env.CLIENT_URL,
@@ -100,9 +101,11 @@ const server = app.listen(PORT, HOST, () => {
 const io = require("socket.io")(server, {
   pingTimeout: 60000,
   cors: {
-    origin: process.env.CLIENT_URL || "http://localhost:3000", 
+    origin: (origin, callback) => {
+      callback(null, isAllowedOrigin(origin));
+    },
     methods: ["GET", "POST"],
-    credentials: true
+    credentials: true,
   },
 });
 
