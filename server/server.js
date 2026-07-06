@@ -10,6 +10,7 @@ const adminRoutes = require("./routes/adminRoutes");
 const toxicityRoutes = require("./routes/toxicityRoutes");
 const cors = require("cors");
 const { notFound, errorHandler } = require("./middleware/errorMiddleware");
+const { roomCreationRateLimit, messageRateLimit, matchmakingRateLimit } = require("./middleware/rateLimitMiddleware");
 const { closeExpiredRooms, getRoomOnlineCount, startExpirationJob, startPurgeJob } = require("./utils/roomExpirationJob");
 const path = require("path");
 
@@ -54,9 +55,9 @@ try {
 // Mount routes - rate limiting via existing protect middleware
 app.use("/api/user", userRoutes);
 app.use("/api/chat", chatRoutes);
-app.use("/api/message", messageRoutes);
-app.use("/api/rooms", roomRoutes);
-app.use("/api/matchmaking", matchmakingRoutes);
+app.use("/api/message", messageRateLimit, messageRoutes);
+app.use("/api/rooms", roomCreationRateLimit, roomRoutes);
+app.use("/api/matchmaking", matchmakingRateLimit, matchmakingRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/health/toxicity", toxicityRoutes);
 
