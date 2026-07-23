@@ -11,24 +11,44 @@ import {
   Text,
   useToast,
 } from "@chakra-ui/react";
+import axios from "axios";
 
 function AdminLogin() {
   const [adminKey, setAdminKey] = React.useState("");
   const [loading, setLoading] = React.useState(false);
   const toast = useToast();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!adminKey.trim()) {
       toast({ title: "Admin key is required", status: "error" });
       return;
     }
     setLoading(true);
-    localStorage.setItem("adminKey", adminKey.trim());
-    toast({ title: "Logged in successfully", status: "success" });
-    setTimeout(() => {
-      window.location.href = "/admin/moderation";
-    }, 500);
+    try {
+      await axios.post(
+        "/api/admin/verify",
+        {},
+        {
+          headers: {
+            "X-Admin-Key": adminKey.trim(),
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      localStorage.setItem("adminKey", adminKey.trim());
+      toast({ title: "Logged in successfully", status: "success" });
+      setTimeout(() => {
+        window.location.href = "/admin/moderation";
+      }, 500);
+    } catch (error) {
+      toast({
+        title: "Invalid admin key",
+        status: "error",
+        duration: 3000,
+      });
+      setLoading(false);
+    }
   };
 
   return (

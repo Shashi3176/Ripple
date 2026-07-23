@@ -5,6 +5,10 @@ const { checkToxicity, checkToxicityDetailed } = require("../utils/toxicityCheck
 
 const router = express.Router();
 
+router.post("/verify", adminAuth, (req, res) => {
+  res.json({ success: true });
+});
+
 router.get("/toxicity-logs", adminAuth, getToxicityLogs);
 router.get("/toxicity-stats", adminAuth, getToxicityStats);
 router.get("/toxicity-charts", adminAuth, getToxicityCharts);
